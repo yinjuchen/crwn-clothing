@@ -1,13 +1,14 @@
 import {useState} from 'react'
+import FormInput from '../form-input/form-input.componenet'
+
+import Button from '../button/button.component'
+
 import {
   signInWithGooglePopup, 
   createUserDocumentFromAuth,
   signInAuthUserWithEmalAndPassword} from '../../utils/firebase/firebase.utils'
 
-import FormInput from '../form-input/form-input.componenet'
 import  './sign-in-form.styles.scss'
-import Button from '../button/button.component'
-
 
 const defaultFormFields = {
   email: '',
@@ -18,12 +19,13 @@ const defaultFormFields = {
 const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields)
   const {email, password} = formFields
+  
 
-  console.log(formFields)
+
+  // console.log(formFields)
 
   const signInWithGoogle = async() => {
-  const {user} = await signInWithGooglePopup()
-  await createUserDocumentFromAuth(user)
+    await signInWithGooglePopup()
 
   }
 
@@ -37,9 +39,12 @@ const SignInForm = () => {
 
 
   try {
-    const response = await signInAuthUserWithEmalAndPassword(email,password)
-    console.log(response)
-    resetFormFields()
+    const {user} = await signInAuthUserWithEmalAndPassword(
+      email,password
+      )
+    
+
+      resetFormFields()
   } catch(error) {
     switch(error.code) {
       case'auth/user-not-found': 
