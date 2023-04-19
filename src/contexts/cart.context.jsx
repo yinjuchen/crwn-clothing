@@ -1,12 +1,13 @@
 import { createContext, useState } from 'react';
 
+// set isCartOpen , setIsCartOpen
 export const CartContext = createContext({
   isCartOpen: false,
   setIsCartOpen: () => {},
 })
 
 
-export const CardProvider = ({children}) => {
+export const CartProvider = ({children}) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const value = {isCartOpen, setIsCartOpen}
   return (
