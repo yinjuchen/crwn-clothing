@@ -15,7 +15,11 @@ import {
   getFirestore,
   doc,
   getDoc,
-  setDoc
+  setDoc,
+  collection,
+  writeBatch,
+  query,
+  getDocs,
 } from 'firebase/firestore'
 
 // this is from our projects after register the app
@@ -44,6 +48,36 @@ export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googlePro
 // create db
 export const db = getFirestore()
 
+export const adCollettionAndDocuments = async (collectionkey, objectsToAdd) => {
+  const collettionRef = collection(db, collectionkey);
+  const batch = writeBatch(db);
+
+  objectsToAdd.forEach((object) => {
+    const docRef = doc(collettionRef, object.title.toLowerCase());
+    batch.set(docRef, object);
+  })
+  await batch.commit()
+  console.log('done')
+};
+
+// how to fetch data? 
+// we write a helper functon here , so we can isolate the change from the 3rd party library on our codebase 
+// if there is any change on the 3rd party libray, we only need to update the helper function instead of change everything if we directly implement them into firebase 
+
+export const getCategoriesAndDocuments = async () => {
+  const collettionRef = collection(db, 'categories');
+  const q = query(collettionRef);
+
+  const querySnapshot = await getDocs(q)
+  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+    const { title, items } = docSnapshot.data();
+    acc[title.toLowerCase()] = items;
+    return acc
+  }, {});
+  return categoryMap;
+}
+
+
 // doc receives three arguments (db, collect, unique id)
 export const createUserDocumentFromAuth = async (
   userAuth, additionalInformation = {}
@@ -71,9 +105,9 @@ export const createUserDocumentFromAuth = async (
         ...additionalInformation
       })
     } catch (error) {
-  
-        console.log('error creating the user', error.message)
-      }
+
+      console.log('error creating the user', error.message)
+    }
 
   }
 
@@ -95,5 +129,5 @@ export const signInAuthUserWithEmalAndPassword = async (email, password) => {
 
 export const signOutUser = async () => await signOut(auth)
 
-export const onAuthStateChangedListener = (callback) => 
+export const onAuthStateChangedListener = (callback) =>
   onAuthStateChanged(auth, callback)
