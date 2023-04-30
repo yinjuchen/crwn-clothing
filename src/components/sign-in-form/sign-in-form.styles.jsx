@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const SignInContainer = styled.div`
- display: flex;
+  display: flex;
   flex-direction: column;
   width: 380px;
 
@@ -13,4 +13,5 @@ export const SignInContainer = styled.div`
 export const ButtonsContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 2.22px;
 `;
