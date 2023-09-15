@@ -1,13 +1,42 @@
-import {compose, createStore, applyMiddleware} from 'redux';
+import { compose, createStore, applyMiddleware } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import logger from 'redux-logger';
+import createSagaMiddleware from 'redux-saga';
+
+import { rootSaga } from './root-saga';
 
 import { rootReducer } from './root-reducer';
 
-// whenever we hit an action, before the action hits the reducer, it hits the middleWares first. middleWar enhances our store 
-const middleWares = [logger];
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['cart'],
+};
 
-// this one for how to trigger middleware
-const composeEnhancers = compose(applyMiddleware(...middleWares))
+const sagaMiddleware = createSagaMiddleware();
 
-// we pass three argeuments into store, this store object is where we call from index.js
-export const store = createStore(rootReducer, undefined, composeEnhancers)
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const middleWares = [
+  process.env.NODE_ENV !== 'production' && logger,
+  sagaMiddleware,
+].filter(Boolean);
+
+const composeEnhancer =
+  (process.env.NODE_ENV !== 'production' &&
+    window &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
+  compose;
+
+const composedEnhancers = composeEnhancer(applyMiddleware(...middleWares));
+
+export const store = createStore(
+  persistedReducer,
+  undefined,
+  composedEnhancers
+);
+
+sagaMiddleware.run(rootSaga);
+
+export const persistor = persistStore(store);
